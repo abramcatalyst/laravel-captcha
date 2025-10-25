@@ -1,7 +1,8 @@
 {
   "name": "justchill/laravel-captcha",
-  "version": "1.0.0",
-  "description": "Ultra-easy CAPTCHA integration for Laravel applications",
+    "description": "Ultra-easy CAPTCHA integration for Laravel applications",
+  "keywords": ["laravel", "captcha", "security", "validation", "spam-protection"],
+  "homepage": "https://github.com/abramcatalyst/laravel-captcha",
   "type": "library",
   "license": "MIT",
   "authors": [
