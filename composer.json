@@ -1,6 +1,6 @@
 {
   "name": "justchill/laravel-captcha",
-    "description": "Ultra-easy CAPTCHA integration for Laravel applications",
+  "description": "Ultra-easy CAPTCHA integration for Laravel applications",
   "keywords": ["laravel", "captcha", "security", "validation", "spam-protection"],
   "homepage": "https://github.com/abramcatalyst/laravel-captcha",
   "type": "library",
@@ -15,12 +15,21 @@
     "php": "^8.0",
     "laravel/framework": "^9.0|^10.0|^11.0|^12.0"
   },
+  "require-dev": {
+    "orchestra/testbench": "^7.0|^8.0|^9.0",
+    "phpunit/phpunit": "^9.5|^10.0|^11.0"
+  },
   "suggest": {
     "ext-gd": "Required for image-based CAPTCHA generation"
   },
   "autoload": {
     "psr-4": {
       "JustChill\\LaravelCaptcha\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "JustChill\\LaravelCaptcha\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -34,5 +43,12 @@
     }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-text"
+  },
+  "config": {
+    "sort-packages": true
+  }
 }

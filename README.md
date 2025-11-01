@@ -1,6 +1,6 @@
 # Laravel CAPTCHA
 
-⚠️ **Beta Version** - This package is under active development. Use in production at your own risk.
+⚠️ **Beta Version** - This package is under active development. Production-ready improvements have been made in the `dev` branch. Use in production at your own risk.
 
 **Ultra-easy CAPTCHA integration for Laravel 9, 10, 11, and 12.**
 
@@ -107,8 +107,9 @@ This creates:
 return [
     'type' => env('CAPTCHA_TYPE', 'math'), // Options: math, word, image
     
-    'expires_minutes' => 10,
-    'max_attempts' => 5,
+    'expires_minutes' => env('CAPTCHA_EXPIRES_MINUTES', 10),
+    'max_attempts' => env('CAPTCHA_MAX_ATTEMPTS', 5),
+    'case_sensitive' => env('CAPTCHA_CASE_SENSITIVE', true),
     
     'allowed_chars' => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
     
@@ -276,14 +277,17 @@ Edit `config/captcha.php`:
 
 ### Case-Insensitive Validation
 
-Edit `CaptchaService.php` line 52:
+Configure in `config/captcha.php` or `.env`:
 
 ```php
-// Case-sensitive (default)
-$isValid = trim($userAnswer) === trim($captcha['answer']);
+// In config/captcha.php
+'case_sensitive' => false, // or use env('CAPTCHA_CASE_SENSITIVE', false)
+```
 
-// Case-insensitive
-$isValid = strtolower(trim($userAnswer)) === strtolower(trim($captcha['answer']));
+Or in your `.env` file:
+
+```env
+CAPTCHA_CASE_SENSITIVE=false
 ```
 
 ### Custom Styling
@@ -422,13 +426,27 @@ php artisan cache:clear
 
 ---
 
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+Or with coverage:
+
+```bash
+composer test-coverage
+```
+
 ## 🗺️ Roadmap
 
-- [ ] PHPUnit test coverage
+- [x] PHPUnit test coverage (in dev branch)
 - [ ] Audio CAPTCHA (accessibility)
 - [ ] Refresh button for image CAPTCHAs
 - [ ] Custom difficulty levels for all types
-- [ ] Multi-language support
+- [x] Multi-language support (translations included)
 - [ ] Redis/database storage option
 - [ ] Rate limiting per IP
 
