@@ -14,7 +14,7 @@ class CaptchaService
         $challenge = $this->createChallenge($type);
         session([$this->sessionKey => [
             'answer' => $challenge['answer'],
-            'expires_at' => now()->addMinutes(10),
+            'expires_at' => now()->addMinutes(config('captcha.expires_minutes', 10)),
             'attempts' => 0
         ]]);
 
@@ -23,32 +23,60 @@ class CaptchaService
 
     public function validate($userAnswer)
     {
+        // Sanitize input
+        if (!is_string($userAnswer)) {
+            $userAnswer = (string) $userAnswer;
+        }
+        $userAnswer = trim($userAnswer);
+
         $captcha = session($this->sessionKey);
 
-        if (!$captcha) {
+        if (!$captcha || !isset($captcha['answer']) || !isset($captcha['expires_at'])) {
             return false;
         }
 
-        if (now()->greaterThan($captcha['expires_at'])) {
+        // Check expiration
+        $expiresAt = $captcha['expires_at'];
+        if (!($expiresAt instanceof \Illuminate\Support\Carbon || $expiresAt instanceof \Carbon\Carbon)) {
+            // Handle string dates
+            try {
+                $expiresAt = \Illuminate\Support\Carbon::parse($expiresAt);
+            } catch (\Exception $e) {
+                session()->forget($this->sessionKey);
+                return false;
+            }
+        }
+
+        if (now()->greaterThan($expiresAt)) {
             session()->forget($this->sessionKey);
             return false;
         }
 
-        if ($captcha['attempts'] >= 5) {
+        // Check max attempts
+        $maxAttempts = config('captcha.max_attempts', 5);
+        $attempts = $captcha['attempts'] ?? 0;
+        
+        if ($attempts >= $maxAttempts) {
             session()->forget($this->sessionKey);
             return false;
         }
 
-        // Increment attempts
+        // Increment attempts before validation
         session([
-            $this->sessionKey . '.attempts' => $captcha['attempts'] + 1
+            $this->sessionKey . '.attempts' => $attempts + 1
         ]);
 
-        /** if we want it not to be case sensitive, we would uncomment this and comment the other one */
-        // $isValid = strtolower(trim($userAnswer)) === strtolower(trim($captcha['answer']));
-        $isValid = trim($userAnswer) === trim($captcha['answer']);
+        // Case-sensitive validation (configurable)
+        $caseSensitive = config('captcha.case_sensitive', true);
+        $correctAnswer = trim($captcha['answer']);
+        
+        if ($caseSensitive) {
+            $isValid = $userAnswer === $correctAnswer;
+        } else {
+            $isValid = strtolower($userAnswer) === strtolower($correctAnswer);
+        }
 
-
+        // Clear session on successful validation
         if ($isValid) {
             session()->forget($this->sessionKey);
         }
@@ -160,43 +188,62 @@ class CaptchaService
         ];
     }
 
-    public function generateImage(): \Illuminate\Http\Response
+    public function generateImage(string $code): \Illuminate\Http\Response
     {
-        $code = decrypt(request()->query('code'));
+        if (!extension_loaded('gd')) {
+            throw new \RuntimeException('GD extension is required for image CAPTCHA generation.');
+        }
 
         $width = config('captcha.image.width', 150);
         $height = config('captcha.image.height', 50);
         $fontSize = config('captcha.image.font_size', 24);
         $bgColor = config('captcha.image.bg_color', '#ffffff');
         $textColor = config('captcha.image.text_color', '#000000');
-        $fonts = config('captcha.fonts');
+        $fonts = config('captcha.fonts', []);
 
         $image = imagecreatetruecolor($width, $height);
+        
+        if ($image === false) {
+            throw new \RuntimeException('Failed to create image resource.');
+        }
 
         // Convert hex colors to RGB
         [$r, $g, $b] = sscanf($bgColor, "#%02x%02x%02x");
-        $bg = imagecolorallocate($image, $r, $g, $b);
+        $bg = imagecolorallocate($image, $r ?? 255, $g ?? 255, $b ?? 255);
         imagefill($image, 0, 0, $bg);
 
         [$tr, $tg, $tb] = sscanf($textColor, "#%02x%02x%02x");
-        $textColorAlloc = imagecolorallocate($image, $tr, $tg, $tb);
+        $textColorAlloc = imagecolorallocate($image, $tr ?? 0, $tg ?? 0, $tb ?? 0);
 
         // Add noise lines
         if (config('captcha.image.noise', true)) {
-            for ($i = 0; $i < config('captcha.image.lines', 3); $i++) {
+            $lines = config('captcha.image.lines', 3);
+            for ($i = 0; $i < $lines; $i++) {
                 $lineColor = imagecolorallocate($image, rand(100, 255), rand(100, 255), rand(100, 255));
                 imageline($image, 0, rand(0, $height), $width, rand(0, $height), $lineColor);
             }
         }
 
         // Draw text
-        $font = $fonts[0] ?? null;
-        if ($font && file_exists($font)) {
-            $box = imagettfbbox($fontSize, 0, $font, $code);
-            $x = ($width - ($box[2] - $box[0])) / 2;
-            $y = ($height + ($box[1] - $box[7])) / 2;
+        $font = null;
+        if (!empty($fonts) && is_array($fonts)) {
+            foreach ($fonts as $fontPath) {
+                if ($fontPath && file_exists($fontPath)) {
+                    $font = $fontPath;
+                    break;
+                }
+            }
+        }
 
-            imagettftext($image, $fontSize, 0, $x, $y, $textColorAlloc, $font, $code);
+        if ($font && function_exists('imagettftext')) {
+            $box = imagettfbbox($fontSize, 0, $font, $code);
+            if ($box !== false) {
+                $x = ($width - ($box[2] - $box[0])) / 2;
+                $y = ($height + ($box[1] - $box[7])) / 2;
+                imagettftext($image, $fontSize, 0, (int)$x, (int)$y, $textColorAlloc, $font, $code);
+            } else {
+                imagestring($image, 5, 10, 10, $code, $textColorAlloc);
+            }
         } else {
             imagestring($image, 5, 10, 10, $code, $textColorAlloc);
         }
@@ -207,6 +254,14 @@ class CaptchaService
         $imageData = ob_get_clean();
         imagedestroy($image);
 
-        return response($imageData)->header('Content-Type', 'image/png');
+        if ($imageData === false) {
+            throw new \RuntimeException('Failed to generate image data.');
+        }
+
+        return response($imageData)
+            ->header('Content-Type', 'image/png')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

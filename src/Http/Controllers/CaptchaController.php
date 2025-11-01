@@ -5,57 +5,45 @@ namespace JustChill\LaravelCaptcha\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use JustChill\LaravelCaptcha\Services\CaptchaService;
+use Illuminate\Support\Facades\Log;
 
 class CaptchaController extends Controller
 {
-    public function image(Request $request)
+    protected $captchaService;
+
+    public function __construct(CaptchaService $captchaService)
     {
-        $code = decrypt($request->get('code'));
-
-        session(['laravel_captcha' => [
-            'answer' => $code,
-            'expires_at' => now()->addMinutes(config('captcha.expires_minutes', 10)),
-            'attempts' => 0
-        ]]);
-
-        return app(CaptchaService::class)->generateImage($code);
+        $this->captchaService = $captchaService;
     }
 
-
-    protected function generateImage($code)
+    public function image(Request $request)
     {
-        $width = 150;
-        $height = 50;
-        $image = imagecreate($width, $height);
+        try {
+            $encryptedCode = $request->get('code');
+            
+            if (!$encryptedCode) {
+                return response('Missing code parameter', 400);
+            }
 
-        // Colors
-        $bg = imagecolorallocate($image, 255, 255, 255);
-        $textColor = imagecolorallocate($image, 0, 0, 0);
-        $lineColor = imagecolorallocate($image, 200, 200, 200);
+            $code = decrypt($encryptedCode);
 
-        // Add noise lines
-        for ($i = 0; $i < 5; $i++) {
-            imageline(
-                $image,
-                rand(0, $width),
-                rand(0, $height),
-                rand(0, $width),
-                rand(0, $height),
-                $lineColor
-            );
+            // Store in session for validation
+            session(['laravel_captcha' => [
+                'answer' => $code,
+                'expires_at' => now()->addMinutes(config('captcha.expires_minutes', 10)),
+                'attempts' => 0
+            ]]);
+
+            return $this->captchaService->generateImage($code);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            Log::warning('CAPTCHA: Failed to decrypt code', ['error' => $e->getMessage()]);
+            return response('Invalid CAPTCHA code', 400);
+        } catch (\RuntimeException $e) {
+            Log::error('CAPTCHA: Image generation failed', ['error' => $e->getMessage()]);
+            return response('Image generation failed', 500);
+        } catch (\Exception $e) {
+            Log::error('CAPTCHA: Unexpected error', ['error' => $e->getMessage()]);
+            return response('An error occurred', 500);
         }
-
-        // Add text
-        $fontSize = 20;
-        $x = ($width - strlen($code) * $fontSize * 0.6) / 2;
-        $y = ($height + $fontSize) / 2;
-
-        imagestring($image, 5, $x, $y - 15, $code, $textColor);
-
-        // Output image
-        header('Content-Type: image/png');
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        imagepng($image);
-        imagedestroy($image);
     }
 }

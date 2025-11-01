@@ -4,8 +4,9 @@ return [
 
     'type' => env('CAPTCHA_TYPE', 'math'), // Options: math, word, image
 
-    'expires_minutes' => 10,
-    'max_attempts' => 5,
+    'expires_minutes' => env('CAPTCHA_EXPIRES_MINUTES', 10),
+    'max_attempts' => env('CAPTCHA_MAX_ATTEMPTS', 5),
+    'case_sensitive' => env('CAPTCHA_CASE_SENSITIVE', true),
 
     'allowed_chars' => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
     'length' => [
