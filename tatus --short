@@ -1,0 +1,73 @@
+[33mcommit e2c3d33158d736159914dc3f10bf9c9e02c934e1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m
+Author: Abraham <abramcatalyst@gmail.com>
+Date:   Sat Nov 1 20:55:23 2025 +0100
+
+    feat: Production readiness improvements for first trial
+    
+    Major improvements to prepare package for production use:
+    
+    Configuration:
+    - Replace hardcoded values with config file references
+    - Add environment variable support (CAPTCHA_EXPIRES_MINUTES, CAPTCHA_MAX_ATTEMPTS, CAPTCHA_CASE_SENSITIVE)
+    - Add case sensitivity configuration option
+    
+    Code Quality:
+    - Remove duplicate image generation code in CaptchaController
+    - Refactor to use CaptchaService for all image generation
+    - Improve error handling with comprehensive try-catch blocks
+    - Add input sanitization and better type checking
+    - Enhance validation with proper session data checks
+    
+    Error Handling:
+    - Add logging support for validation failures
+    - Improve exception handling for image generation
+    - Add translation fallbacks for error messages
+    - Better HTTP headers for image responses (Cache-Control, Pragma, Expires)
+    - Improve Carbon date handling with fallback
+    
+    Security:
+    - Add input sanitization in validation method
+    - Improve error handling to prevent information leakage
+    - Better exception handling for encrypted code decryption
+    
+    Middleware & Validation:
+    - Improve middleware with JSON and web response support
+    - Fix translation loading path
+    - Add fallback messages for translation failures
+    - Enhance ServiceProvider with proper translation loading
+    - Fix middleware registration for Laravel 9-12 compatibility
+    
+    Testing:
+    - Add PHPUnit test suite (unit and feature tests)
+    - Add phpunit.xml configuration
+    - Add composer test scripts
+    - Create comprehensive test coverage
+    
+    Documentation:
+    - Add TESTING.md with local testing guide
+    - Add DEPLOYMENT.md with merge strategy
+    - Add ACCEPTANCE_CHECKLIST.md for verification
+    - Add VERIFICATION_GUIDE.md for testing steps
+    - Update README with production readiness notes
+    - Update CHANGELOG with all improvements
+    - Add scripts/quick-test.php for validation
+    
+    This commit prepares the package for its first production trial.
+
+ ACCEPTANCE_CHECKLIST.md                    | 202 [32m++++++++++++++++++++++++[m
+ CHANGELOG.md                               |  50 [32m+++++[m[31m-[m
+ DEPLOYMENT.md                              | 128 [32m+++++++++++++++[m
+ README.md                                  |  38 [32m+++[m[31m--[m
+ TESTING.md                                 | 245 [32m+++++++++++++++++++++++++++++[m
+ VERIFICATION_GUIDE.md                      | 157 [32m++++++++++++++++++[m
+ composer.json                              |  20 [32m++[m[31m-[m
+ phpunit.xml                                |  34 [32m++++[m
+ scripts/quick-test.php                     | 185 [32m++++++++++++++++++++++[m
+ src/CaptchaServiceProvider.php             |  31 [32m+++[m[31m-[m
+ src/Http/Controllers/CaptchaController.php |  76 [32m++++[m[31m-----[m
+ src/Http/Middleware/CaptchaMiddleware.php  |  51 [32m+++++[m[31m-[m
+ src/Services/CaptchaService.php            | 101 [32m+++++++++[m[31m---[m
+ src/config/captcha.php                     |   5 [32m+[m[31m-[m
+ tests/Feature/CaptchaTest.php              |  86 [32m++++++++++[m
+ tests/Unit/CaptchaServiceTest.php          | 161 [32m+++++++++++++++++++[m
+ 16 files changed, 1478 insertions(+), 92 deletions(-)
