@@ -30,7 +30,7 @@ class CaptchaController extends Controller
             // Store in session for validation
             session(['laravel_captcha' => [
                 'answer' => $code,
-                'expires_at' => now()->addMinutes(config('captcha.expires_minutes', 10)),
+                'expires_at' => now()->addMinutes((int) config('captcha.expires_minutes', 10)),
                 'attempts' => 0
             ]]);
 

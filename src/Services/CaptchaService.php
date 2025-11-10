@@ -14,7 +14,7 @@ class CaptchaService
         $challenge = $this->createChallenge($type);
         session([$this->sessionKey => [
             'answer' => $challenge['answer'],
-            'expires_at' => now()->addMinutes(config('captcha.expires_minutes', 10)),
+            'expires_at' => now()->addMinutes((int) config('captcha.expires_minutes', 10)),
             'attempts' => 0
         ]]);
 
