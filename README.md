@@ -26,7 +26,7 @@
 - 🔍 Built-in validation rule: `captcha`
 - 🖼️ Image-based CAPTCHA with GD support
 - ⚙️ Configurable attempts limit and expiration
-- 🛠️ Publishable config + views
+- 🛠️ Publishable config, views, and language files
 - ✔️ Case-sensitive validation (configurable)
 
 ---
@@ -91,7 +91,7 @@ php -m | grep gd
 
 ## ⚙️ Configuration
 
-Publish configuration and views:
+Publish configuration:
 
 ```bash
 php artisan vendor:publish --tag=captcha-config
@@ -99,7 +99,24 @@ php artisan vendor:publish --tag=captcha-config
 
 This creates:
 - `config/captcha.php` - Main configuration
+
+To publish views (optional, for customization):
+
+```bash
+php artisan vendor:publish --tag=captcha-views
+```
+
+This creates:
 - `resources/views/vendor/captcha/challenge.blade.php` - Customizable view
+- `resources/views/vendor/captcha/_challenge-body.blade.php` - Challenge body partial
+
+To publish language files (optional):
+
+```bash
+php artisan vendor:publish --tag=captcha-lang
+```
+
+This creates language files in `lang/vendor/captcha/` for translations.
 
 ### Configuration File (`config/captcha.php`)
 
@@ -295,8 +312,10 @@ CAPTCHA_CASE_SENSITIVE=false
 Publish views and edit `resources/views/vendor/captcha/challenge.blade.php`:
 
 ```bash
-php artisan vendor:publish --tag=captcha-config
+php artisan vendor:publish --tag=captcha-views
 ```
+
+Then edit the published view file to customize the styling.
 
 ---
 

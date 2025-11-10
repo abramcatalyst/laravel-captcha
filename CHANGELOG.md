@@ -29,6 +29,8 @@ All notable changes to ⁠ laravel-captcha ⁠ will be documented in this file.
 •⁠  ⁠Fixed middleware registration for Laravel 9-12 compatibility
 •⁠  ⁠Improved validation message handling with proper translations
 •⁠  ⁠Fixed session data structure validation
+•⁠  ⁠Fixed Carbon addMinutes() TypeError by casting config values to int
+•⁠  ⁠Fixed documentation - clarified separate publish tags for config, views, and lang
 
 ### Security
 •⁠  ⁠Added input sanitization in validation method
