@@ -27,7 +27,7 @@
             style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
     </div>
 
-    {{-- OPTIONAL HIDDEN TYPE FOR DEBUGGING --}}
+    {{-- Hidden field to track CAPTCHA type --}}
     <input type="hidden" name="captcha_type" value="{{ $challenge['type'] ?? 'unknown' }}">
 
     {{-- WARNING MESSAGE (e.g. fallback notice) --}}

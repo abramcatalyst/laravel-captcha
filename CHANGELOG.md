@@ -2,7 +2,7 @@
 
 All notable changes to ⁠ laravel-captcha ⁠ will be documented in this file.
 
-## [Unreleased] - Production Readiness Update
+## [1.0.0] - 2025-11-01 - Production Release
 
 ### Changed
 •⁠  ⁠Replaced hardcoded configuration values with config file references
@@ -38,13 +38,18 @@ All notable changes to ⁠ laravel-captcha ⁠ will be documented in this file.
 •⁠  ⁠Better exception handling for encrypted code decryption
 
 ### Documentation
-•⁠  ⁠Updated README with production readiness notes
+•⁠  ⁠Updated README for production release (removed beta warnings)
 •⁠  ⁠Added configuration documentation for new options
+•⁠  ⁠Added comprehensive testing and deployment guides
 
 ### Testing
 •⁠  ⁠Added PHPUnit test suite
 •⁠  ⁠Added test coverage for validation, generation, and middleware
 •⁠  ⁠Added tests for case sensitivity configuration
+
+### Production Ready
+•⁠  ⁠Changed minimum stability from "dev" to "stable" in composer.json
+•⁠  ⁠Package is now production-ready and stable for use
 
 ## [v0.1.0-beta] - 2025-10-25
 

@@ -42,8 +42,9 @@
       }
     }
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true,
+  "version": "1.0.0",
   "scripts": {
     "test": "phpunit",
     "test-coverage": "phpunit --coverage-text"

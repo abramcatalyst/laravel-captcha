@@ -1,7 +1,5 @@
 # Laravel CAPTCHA
 
-⚠️ **Beta Version** - This package is under active development. Production-ready improvements have been made in the `dev` branch. Use in production at your own risk.
-
 **Ultra-easy CAPTCHA integration for Laravel 9, 10, 11, and 12.**
 
 `justchill/laravel-captcha` provides a minimal, flexible CAPTCHA system with math, word, and image rendering, session-based validation, Blade directive support, and optional middleware integration.
@@ -461,7 +459,7 @@ composer test-coverage
 
 ## 🗺️ Roadmap
 
-- [x] PHPUnit test coverage (in dev branch)
+- [x] PHPUnit test coverage
 - [ ] Audio CAPTCHA (accessibility)
 - [ ] Refresh button for image CAPTCHAs
 - [ ] Custom difficulty levels for all types
